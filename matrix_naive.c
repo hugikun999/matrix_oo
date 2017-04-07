@@ -8,15 +8,15 @@ struct naive_priv {
 #define PRIV(x) \
     ((struct naive_priv *) ((x)->priv))
 
-static void assign(Matrix *thiz, Mat4x4 data)
+static void assign(Matrix *thiz, int row, int col, float *values)
 {
-    /* FIXME: don't hardcode row & col */
-    thiz->row = thiz->col = 4;
+    thiz->row = row;
+    thiz->col = col;
 
-    thiz->priv = malloc(4 * 4 * sizeof(float));
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            PRIV(thiz)->values[i][j] = data.values[i][j];
+    thiz->priv = malloc(row * col * sizeof(float));
+    for (int i = 0; i < col; i++)
+        for (int j = 0; j < row; j++)
+            PRIV(thiz)->values[i][j] = *(values + i * row + j);
 }
 
 static const float epsilon = 1 / 10000.0;

@@ -1,7 +1,8 @@
 #include "matrix.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-MatrixAlgo *matrix_providers[] = {                                                                                                                
+MatrixAlgo *matrix_providers[] = {
     &NaiveMatrixProvider,
 };
 
@@ -10,34 +11,22 @@ int main()
     MatrixAlgo *algo = matrix_providers[0];
 
     Matrix dst, m, n, fixed;
-    algo->assign(&m, (Mat4x4) {
-        .values = {
-            { 1, 2, 3, 4, },
-            { 5, 6, 7, 8, },
-            { 1, 2, 3, 4, },
-            { 5, 6, 7, 8, },
-        },
-    });
-
-    algo->assign(&n, (Mat4x4) {
-        .values = {
-            { 1, 2, 3, 4, },
-            { 5, 6, 7, 8, },
-            { 1, 2, 3, 4, },
-            { 5, 6, 7, 8, },
-        },
-    });
-
+    float value[16] = {1, 2, 3, 4,
+                       5, 6, 7, 8,
+                       1, 2, 3, 4,
+                       5, 6, 7, 8
+                      };
+    algo->assign(&m, 4, 4, value);
+    algo->assign(&n, 4, 4, value);
     algo->mul(&dst, &m, &n);
 
-    algo->assign(&fixed, (Mat4x4) {
-        .values = {
-            { 34,  44,  54,  64, },
-            { 82, 108, 134, 160, },
-            { 34,  44,  54,  64, },
-            { 82, 108, 134, 160, },
-        },
-    });
+
+    float value_fix[16] = {34,  44,  54,  64,
+                           82, 108, 134, 160,
+                           34,  44,  54,  64,
+                           82, 108, 134, 160
+                          };
+    algo->assign(&fixed, 4, 4, value_fix);
 
     if (algo->equal(&dst, &fixed))
         return 0;
