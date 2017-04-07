@@ -1,45 +1,59 @@
-#include "matrix.h"
+#include <stdio.h>
 #include <stdlib.h>
+#include <linux/random.h>
 
-struct naive_priv {
-    float values[4][4];
-};
+#include "matrix.h"
 
-#define PRIV(x) \
-    ((struct naive_priv *) ((x)->priv))
+#define ROW(x) \
+	x->row
 
-static void assign(Matrix *thiz, int row, int col, float *values)
+#define COL(x) \
+	x->col
+
+static void assign(Matrix *thiz, int row, int col, float *value)
 {
     thiz->row = row;
     thiz->col = col;
 
-    thiz->priv = malloc(row * col * sizeof(float));
+    thiz->values = (float *)malloc(row * col * sizeof(float));
     for (int i = 0; i < col; i++)
         for (int j = 0; j < row; j++)
-            PRIV(thiz)->values[i][j] = *(values + i * row + j);
+            *(thiz->values + i * row + j) = *(value + i * row + j);
 }
 
 static const float epsilon = 1 / 10000.0;
 
 static bool equal(const Matrix *l, const Matrix *r)
 {
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            if (PRIV(l)->values[i][j] + epsilon < PRIV(r)->values[i][j] ||
-                    PRIV(r)->values[i][j] + epsilon < PRIV(l)->values[i][j])
+    if(ROW(l) != ROW(r) || COL(l) != COL(r))
+        return false;
+
+    for (int i = 0; i < ROW(l); i++)
+        for (int j = 0; j < COL(l); j++)
+            if (*(l->values + i * ROW(l) + j) + epsilon < *(r->values + i * ROW(r) + j) ||
+                    *(r->values + i * ROW(r) + j) + epsilon < *(l->values + i * ROW(r) + j))
                 return false;
     return true;
 }
 
 bool mul(Matrix *dst, const Matrix *l, const Matrix *r)
 {
-    /* FIXME: error hanlding */
-    dst->priv = malloc(4 * 4 * sizeof(float));
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            for (int k = 0; k < 4; k++)
-                PRIV(dst)->values[i][j] += PRIV(l)->values[i][k] *
-                                           PRIV(r)->values[k][j];
+    if(ROW(l) != COL(r))
+        return false;
+
+    dst->values = (float *) malloc(COL(l) * ROW(r) * sizeof(float));
+    for (int i = 0; i < COL(l); i++)
+        for (int j = 0; j < ROW(r); j++)
+            *(dst->values + i * COL(l) + j) = 0;
+
+    for (int i = 0; i < COL(l); i++)
+        for (int j = 0; j < ROW(r); j++)
+            for (int k = 0; k < ROW(l); k++)
+                *(dst->values + i * COL(l) + j) += *(l->values + i * COL(l) + k) *
+                                                   *(r->values + k * COL(l) + j);
+    dst->row = COL(l);
+    dst->col = ROW(r);
+
     return true;
 }
 
