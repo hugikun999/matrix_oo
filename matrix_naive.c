@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <linux/random.h>
+#include <string.h>
 
 #include "matrix.h"
 
@@ -42,9 +42,7 @@ bool mul(Matrix *dst, const Matrix *l, const Matrix *r)
         return false;
 
     dst->values = (float *) malloc(COL(l) * ROW(r) * sizeof(float));
-    for (int i = 0; i < COL(l); i++)
-        for (int j = 0; j < ROW(r); j++)
-            *(dst->values + i * COL(l) + j) = 0;
+    memset(dst->values, sizeof(float), sizeof(float) * COL(l) * ROW(r));
 
     for (int i = 0; i < COL(l); i++)
         for (int j = 0; j < ROW(r); j++)
