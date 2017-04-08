@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <linux/random.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <assert.h>
 
 #include "matrix.h"
 
@@ -55,8 +59,26 @@ bool mul(Matrix *dst, const Matrix *l, const Matrix *r)
     return true;
 }
 
+Matrix *create_new(int row, int col)
+{
+    Matrix *new_mat = (Matrix *) malloc(sizeof(Matrix));
+
+    new_mat->row = row;
+    new_mat->col = col;
+
+    new_mat->values = (float *) malloc(sizeof(float) * row * col);
+
+    if (!syscall(SYS_getrandom, new_mat->values, sizeof(float) * row * col, GRND_NONBLOCK)) {
+        perror("error create");
+        return NULL;
+    }
+
+    return new_mat;
+}
+
 MatrixAlgo NaiveMatrixProvider = {
     .assign = assign,
     .equal = equal,
     .mul = mul,
+    .create = create_new
 };

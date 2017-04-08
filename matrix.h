@@ -18,7 +18,7 @@ typedef struct {
     void (*assign) (Matrix *thiz, int row, int col, float *value);
     bool (*equal) (const Matrix *l, const Matrix *r);
     bool (*mul) (Matrix *dst, const Matrix *l, const Matrix *r);
-    float *(*create) (int row, int col);
+    Matrix *(*create) (int row, int col);
 } MatrixAlgo;
 
 /* Available matrix providers */
